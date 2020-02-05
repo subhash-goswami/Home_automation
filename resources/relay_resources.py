@@ -1,83 +1,84 @@
-from connection.connection import ConnectionModel
+from model.relay_model import RelayModel
 from flask_restful import Resource
 
 
 class Relay(Resource):
-    mongo_client = ConnectionModel.connect()
 
     def post(self, rid, relay_name, status):
         try:
-            result = self.mongo_client.insert_one(
-                {"_id": int(rid), "relay_name": relay_name, "status": int(status)})
-            if result:
-                return {"message": "New relay is Added successfully",
-                        "relay id": result.inserted_id}, 201  # Created new Relay
+            if RelayModel.find_by_relayname(relay_name):
+                return {"message": "This relay is already exists"}
+            relay = RelayModel(rid=rid, relay_name=relay_name, status=status)
+            relay.save_to_db()
+            return {"message": "New relay is Added successfully",
+                        "relay id": relay.rid}, 201  # Created new Relay
         except Exception as e:
             return {"ERROR": "While inserting Relay details: " + str(e)}, 400  # Bad Request
 
     def get(self, rid, relay_name, status):
         try:
-            result = self.mongo_client.find_one({"_id": int(rid)})
-            if result:
-                return {"Relay details": result}, 200
+            relay= RelayModel.find_by_id(rid=rid)
+            if relay:
+                return {"Relay details": relay.json()}, 200
             return {"message": "Data is not found"}, 404
         except Exception as e:
             return {"ERROR": "While fetching relay details :" + str(e)}
 
     def put(self, rid, relay_name, status):
         try:
-            result = self.mongo_client.find_one_and_update({"_id": int(rid)},
-                                                           {"$set": {"relay_name": relay_name,
-                                                                     "status": int(status)}})
-            if result:
-                return {"message": "Data is updated successfully", "Old data": result}, 200
-            return {"message": "Data is not found"}, 404
+            relay = RelayModel.find_by_id(rid=rid)
+            if relay is None:
+                relay = RelayModel(rid=rid, relay_name=relay_name, status=status)
+            else:
+                relay.relay_name = relay_name
+                relay.status = status
+            relay.save_to_db()
+            return {"message": "Data is updated successfully", "New data": relay.json()}, 200
         except Exception as e:
             return {"ERROR": "While updating relay details :" + str(e)}
 
     def delete(self, rid, relay_name, status):
         try:
-            result = self.mongo_client.find_one_and_delete({"_id": int(rid), "relay_name": relay_name})
-            if result:
-                return {"message": "Data is deleted successfully", "Old data": result}, 200
+            relay = RelayModel.find_by_id(rid=rid)
+            if relay:
+                relay.delete_from_db()
+                return {"message": "Data is deleted successfully"}, 200
             return {"message": "Data is not found"}, 404
         except Exception as e:
             return {"ERROR": "While deleting relay details :" + str(e)}
 
 
 class RelayGetOne(Resource):
-    mongo_client = ConnectionModel.connect()
-
     def get(self, rid):
         try:
-            result = self.mongo_client.find_one({"_id": int(rid)})
-            if result:
-                return result['status'], 200
+            relay = RelayModel.find_by_id(rid=rid)
+            if relay:
+                realy_details=relay.json()
+                return realy_details['status'], 200
             return {"message": "Data is not found"}, 404
-        except Exception as e:
-            return {"ERROR": "While fetching relay details: " + str(e)}
-
-
-class RelayUpdateOne(Resource):
-    mongo_client = ConnectionModel.connect()
-
-    def put(self, rid,status):
-        try:
-            result = self.mongo_client.find_one_and_update({"_id": int(rid)}, {"$set": {"status": int(status)}})
-            if result:
-                return {"message": "status is updated","Old Data":result}, 200
         except Exception as e:
             return {"ERROR": "While fetching relay details :" + str(e)}
 
 
-class RelayGetAll(Resource):
-    mongo_client = ConnectionModel.connect()
+class RelayUpdateOne(Resource):
 
+    def put(self, rid, status):
+        try:
+            relay = RelayModel.find_by_id(rid=rid)
+            if relay:
+                relay.status = status
+            relay.save_to_db()
+            return {"message": "Data is updated successfully", "New data": relay.json()}, 200
+        except Exception as e:
+            return {"ERROR": "While updating relay details :" + str(e)}
+
+
+class RelayGetAll(Resource):
     def get(self):
         try:
-            result = self.mongo_client.find()
-            if result.count() > 0:
-                return {"Relay Details": [r for r in result]}, 200  # OK
+            relay_details=[relay.json() for relay in RelayModel.query.all()]
+            if len(relay_details) > 0:
+                return {"Relay Details": relay_details}, 200
             return {"message": "No Relay is available in Database"}, 404
         except Exception as e:
             return {"ERROR": "while getting all relay details: " + str(e)}, 400  # Bad Request
