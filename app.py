@@ -12,9 +12,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # This is when we used postman
 # It is first create our all dbs
 
-@app.before_first_request
-def create_tables():
-    db.create_all()
+# @app.before_first_request
+# def create_tables():
+#     db.create_all()
 
 
 api.add_resource(Relay, '/relay/<string:rid>/<string:relay_name>/<string:status>')
