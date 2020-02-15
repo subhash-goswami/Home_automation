@@ -54,7 +54,7 @@ class RelayGetOne(Resource):
             relay = RelayModel.find_by_id(rid=rid)
             if relay:
                 realy_details=relay.json()
-                return {realy_details['status']}
+                return realy_details['status']
             return {"message": "Data is not found"}, 404
         except Exception as e:
             return {"ERROR": "While fetching relay details :" + str(e)}
