@@ -17,7 +17,7 @@ class Relay(Resource):
 
     def get(self, rid, relay_name, status):
         try:
-            relay= RelayModel.find_by_id(rid=rid)
+            relay = RelayModel.find_by_id(rid=rid)
             if relay:
                 return {"Relay details": relay.json()}, 200
             return {"message": "Data is not found"}, 404
@@ -49,11 +49,12 @@ class Relay(Resource):
 
 
 class RelayGetOne(Resource):
+
     def get(self, rid):
         try:
             relay = RelayModel.find_by_id(rid=rid)
             if relay:
-                realy_details=relay.json()
+                realy_details = relay.json()
                 return realy_details['status'], 200
             return {"message": "Data is not found"}, 404
         except Exception as e:
@@ -76,7 +77,7 @@ class RelayUpdateOne(Resource):
 class RelayGetAll(Resource):
     def get(self):
         try:
-            relay_details=[relay.json() for relay in RelayModel.query.all()]
+            relay_details = [relay.json() for relay in RelayModel.query.all()]
             if len(relay_details) > 0:
                 return {"Relay Details": relay_details}
             return {"message": "No Relay is available in Database"}, 404

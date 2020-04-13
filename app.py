@@ -17,7 +17,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 #     db.create_all()
 
 
-api.add_resource(Relay, '/relay/<string:rid>/<string:relay_name>/<string:status>')
+api.add_resource(Relay, '/relay/<string:rid>/<string:relay_name>/<string:status>')  # Insert, Update, Delete
 api.add_resource(RelayGetOne, '/relaygetone/<string:rid>')
 api.add_resource(RelayUpdateOne, '/relayupdateone/<string:rid>/<string:status>')
 api.add_resource(RelayGetAll, '/gets')
