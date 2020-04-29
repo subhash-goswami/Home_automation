@@ -1,7 +1,7 @@
 # Home_automation
 This API is used for home automation
 
-# Basic information for This API
+# Basic information for API
 
 # Python
 New Link for IFTTT :- 
